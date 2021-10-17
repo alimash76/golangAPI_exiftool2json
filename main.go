@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	//XML library
 	"encoding/xml"
+	//API system
+	"net/http"
+	"log"
 )
 
 // XML/JSON structs:
@@ -25,7 +28,7 @@ type TagStruct struct{
 	Descs	[]string	`xml:"desc"		json:"desc"`
 }
 
-func main(){
+func exiftoolExecuter(w http.ResponseWriter, r *http.Request){
 
 	//Execute the Command and get the output
 	cmd := exec.Command("./runexiftool.sh")
@@ -47,7 +50,24 @@ func main(){
         fmt.Println("Error marshalling to JSON", err)
         return
     }
-	fmt.Println(string(result))
-
+	// fmt.Println(string(result))
+	// respond := Payload{result}
+	w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+	// json.NewEncoder(w).Encode(result)
+	w.Write(result)
 }
 
+func homepage(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "API system works")
+}
+
+func handleRequests(){
+	// http.HandleFunc("/", homepage)
+	http.HandleFunc("/", exiftoolExecuter)
+	log.Fatal(http.ListenAndServe(":8000", nil))
+}
+
+func main(){
+	handleRequests()
+}
