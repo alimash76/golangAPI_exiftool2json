@@ -1,27 +1,29 @@
 package main
 
 import (
+	//For executing commands
 	"os/exec"
+	//Printing Data
 	"fmt"
-	// "encoding/json"
+	//JSON library
+	"encoding/json"
+	//XML library
 	"encoding/xml"
-	// "strconv"
 )
 
-// XML structs:
+// XML/JSON structs:
 type IndexType struct{
-	IndexStruct []TableStruct	`xml:"table"`
+	IndexStruct []TableStruct	`xml:"table"	json:"table"`
 }
 
 type TableStruct struct{
-	Desc		string		`xml:"desc"`
-	Tags		[]TagStruct	`xml:"tag"`
+	Desc		string		`xml:"desc"		json:"desc"`
+	Tags		[]TagStruct	`xml:"tag"		json:"tag"`
 }
 
 type TagStruct struct{
-	Descs	[]string	`xml:"desc"`
+	Descs	[]string	`xml:"desc"		json:"desc"`
 }
-
 
 func main(){
 
@@ -29,17 +31,23 @@ func main(){
 	cmd := exec.Command("./runexiftool.sh")
 	stdout, err := cmd.CombinedOutput()
 	if err != nil{
-		fmt.Printf("Error")
+		fmt.Printf("Error Executing the command!")
 	}
 
-	//Create xml struct
+	//Parse XML to a struct
 	data := string(stdout)
 	var s IndexType
 	xml.Unmarshal([]byte(data), &s)
-
 	// fmt.Println(s.IndexStruct)
 	// fmt.Println(s)
-	
-	//Json
+
+	//Create JSON Data
+	result, err := json.Marshal(s)
+	if nil != err {
+        fmt.Println("Error marshalling to JSON", err)
+        return
+    }
+	fmt.Println(string(result))
+
 }
 
